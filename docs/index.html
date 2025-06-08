@@ -455,7 +455,8 @@
             const header = document.createElement('span');
             header.className = 'text-cyan-400 cursor-pointer hover:underline';
             const icon = document.createElement('i');
-            icon.className = 'fa-solid fa-caret-down mr-1.5';
+            // MODIFIED: Start with collapsed icon
+            icon.className = 'fa-solid fa-caret-right mr-1.5';
             header.appendChild(icon);
 
             let keyText =
@@ -476,7 +477,8 @@
             li.appendChild(info);
 
             const childrenUl = document.createElement('ul');
-            childrenUl.className = 'space-y-1 pt-1';
+            // MODIFIED: Start in a hidden state
+            childrenUl.className = 'space-y-1 pt-1 hidden';
 
             if (childCount > 0) {
               li.appendChild(childrenUl);
