@@ -60,6 +60,10 @@
       .tree-view li {
         position: relative;
       }
+      /* Added for tree view toggle */
+      .tree-view ul.hidden {
+        display: none;
+      }
     </style>
   </head>
   <body class="bg-slate-900 text-slate-300 flex flex-col h-screen">
@@ -300,125 +304,9 @@
             ></i>
           </div>
         </div>
-        <div class="flex-grow p-4 overflow-y-auto font-mono text-sm tree-view">
-          <ul class="space-y-1">
-            <li>
-              <span class="text-cyan-400 cursor-pointer hover:underline"
-                ><i class="fa-solid fa-caret-down mr-1.5"></i>{ } root</span
-              >
-              <span class="text-slate-500 text-xs ml-2">Object[7]</span>
-              <ul class="space-y-1 pt-1">
-                <li>
-                  <span class="text-purple-400">"id":</span>
-                  <span class="text-orange-400 ml-2">"001"</span>
-                  <span class="text-slate-500 text-xs ml-3">string</span>
-                </li>
-                <li>
-                  <span class="text-purple-400">"type":</span>
-                  <span class="text-orange-400 ml-2">"donut"</span>
-                  <span class="text-slate-500 text-xs ml-3">string</span>
-                </li>
-                <li>
-                  <span class="text-purple-400">"name":</span>
-                  <span class="text-orange-400 ml-2">"Cake"</span>
-                  <span class="text-slate-500 text-xs ml-3">string</span>
-                </li>
-                <li>
-                  <span class="text-purple-400">"ppu":</span>
-                  <span class="text-green-400 ml-2">0.55</span>
-                  <span class="text-slate-500 text-xs ml-3">number</span>
-                </li>
-                <li>
-                  <span class="text-purple-400">"available":</span>
-                  <span class="text-blue-400 ml-2">true</span>
-                  <span class="text-slate-500 text-xs ml-3">boolean</span>
-                </li>
-                <li>
-                  <span class="text-cyan-400 cursor-pointer hover:underline"
-                    ><i class="fa-solid fa-caret-down mr-1.5"></i
-                    >"batters"</span
-                  >
-                  <span class="text-slate-500 text-xs ml-2">Object[1]</span>
-                  <ul class="space-y-1 pt-1">
-                    <li>
-                      <span class="text-cyan-400 cursor-pointer hover:underline"
-                        ><i class="fa-solid fa-caret-right mr-1.5"></i
-                        >"batter"</span
-                      >
-                      <span class="text-slate-500 text-xs ml-2">Array[4]</span>
-                    </li>
-                  </ul>
-                </li>
-                <li
-                  class="bg-slate-800/50 rounded-md border-l-2 border-cyan-500 -ml-4 pl-4"
-                >
-                  <span class="text-cyan-400 cursor-pointer hover:underline"
-                    ><i class="fa-solid fa-caret-down mr-1.5"></i
-                    >"topping"</span
-                  >
-                  <span class="text-slate-500 text-xs ml-2">Array[7]</span>
-                  <ul class="space-y-1 pt-1">
-                    <li>
-                      <span class="text-cyan-400 cursor-pointer hover:underline"
-                        ><i class="fa-solid fa-caret-right mr-1.5"></i>[0]</span
-                      >
-                      <span class="text-slate-500 text-xs ml-2">Object[2]</span>
-                    </li>
-                    <li>
-                      <span class="text-cyan-400 cursor-pointer hover:underline"
-                        ><i class="fa-solid fa-caret-right mr-1.5"></i>[1]</span
-                      >
-                      <span class="text-slate-500 text-xs ml-2">Object[2]</span>
-                    </li>
-                    <li class="bg-cyan-500/10 rounded-md">
-                      <span class="text-cyan-400 cursor-pointer hover:underline"
-                        ><i class="fa-solid fa-caret-down mr-1.5"></i>[2]</span
-                      >
-                      <span class="text-slate-500 text-xs ml-2">Object[2]</span>
-                      <ul class="space-y-1 pt-1">
-                        <li>
-                          <span class="text-purple-400">"id":</span>
-                          <span class="text-orange-400 ml-2">"5005"</span>
-                        </li>
-                        <li>
-                          <span class="text-purple-400">"type":</span>
-                          <span class="text-orange-400 ml-2">"Sugar"</span>
-                        </li>
-                      </ul>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <span class="text-purple-400">"last_updated":</span>
-                  <a
-                    href="#"
-                    class="text-orange-400 ml-2 underline decoration-dotted hover:text-orange-300"
-                    >"2025-06-08T12:57:00Z"</a
-                  >
-                  <span class="text-slate-500 text-xs ml-3"
-                    >string
-                    <i
-                      class="fa-solid fa-clock ml-1"
-                      title="Date-time format"
-                    ></i
-                  ></span>
-                </li>
-                <li>
-                  <span class="text-purple-400">"image_url":</span>
-                  <a
-                    href="#"
-                    class="text-orange-400 ml-2 underline decoration-dotted hover:text-orange-300"
-                    >"https://example.com/donut.png"</a
-                  >
-                  <span class="text-slate-500 text-xs ml-3"
-                    >string
-                    <i class="fa-solid fa-image ml-1" title="Image URL"></i
-                  ></span>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </div>
+        <div
+          class="flex-grow p-4 overflow-y-auto font-mono text-sm tree-view"
+        ></div>
       </div>
     </main>
 
@@ -426,69 +314,235 @@
       class="flex items-center justify-between px-4 py-1 border-t border-slate-700 bg-slate-800 text-xs font-mono text-slate-400"
     >
       <div class="flex items-center gap-4">
-        <span class="flex items-center gap-2">
-          <i class="fa-solid fa-check-circle text-green-500"></i>
-          Valid
-        </span>
-        <span>Path: root.topping[2]</span>
+        <span id="json-status" class="flex items-center gap-2"> </span>
+        <span id="json-path">Path: root</span>
       </div>
       <div class="flex items-center gap-4">
-        <span>Nodes: 25</span>
-        <span>Size: 587 B</span>
+        <span id="json-nodes">Nodes: 0</span>
+        <span id="json-size">Size: 0 B</span>
       </div>
     </footer>
 
     <script>
-      // --- 行番号を生成する簡易スクリプト ---
-      const codeInput = document.getElementById('code-input');
-      const lineNumbers = document.getElementById('line-numbers');
+      document.addEventListener('DOMContentLoaded', () => {
+        // --- Element References ---
+        const codeInput = document.getElementById('code-input');
+        const lineNumbers = document.getElementById('line-numbers');
+        const dropdownToggles = document.querySelectorAll(
+          '[data-dropdown-toggle]'
+        );
+        const treeViewContainer = document.querySelector('.tree-view');
+        const jsonStatus = document.getElementById('json-status');
+        const jsonPath = document.getElementById('json-path');
+        const jsonNodes = document.getElementById('json-nodes');
+        const jsonSize = document.getElementById('json-size');
+        let activeNode = null;
 
-      const updateLineNumbers = () => {
-        if (!codeInput || !lineNumbers) return;
-        const lineCount = codeInput.value.split('\n').length;
-        lineNumbers.innerHTML = Array.from(
-          { length: lineCount },
-          (_, i) => i + 1
-        ).join('\n');
-      };
+        // --- Utility Functions ---
+        const formatBytes = (bytes, decimals = 2) => {
+          if (bytes === 0) return '0 B';
+          const k = 1024;
+          const dm = decimals < 0 ? 0 : decimals;
+          const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return (
+            parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
+          );
+        };
 
-      codeInput.addEventListener('input', updateLineNumbers);
-      codeInput.addEventListener('scroll', () => {
-        lineNumbers.scrollTop = codeInput.scrollTop;
-      });
+        const countNodes = data => {
+          if (data === null || typeof data !== 'object') {
+            return 1;
+          }
+          return Object.keys(data).reduce(
+            (acc, key) => acc + 1 + countNodes(data[key]),
+            0
+          );
+        };
 
-      updateLineNumbers();
+        // --- Line Numbers Script ---
+        const updateLineNumbers = () => {
+          if (!codeInput || !lineNumbers) return;
+          const lineCount = codeInput.value.split('\n').length;
+          lineNumbers.innerHTML = Array.from(
+            { length: lineCount },
+            (_, i) => i + 1
+          ).join('\n');
+        };
 
-      // --- ドロップダウンメニューの制御スクリプト ---
-      const dropdownToggles = document.querySelectorAll(
-        '[data-dropdown-toggle]'
-      );
+        codeInput.addEventListener('scroll', () => {
+          lineNumbers.scrollTop = codeInput.scrollTop;
+        });
 
-      dropdownToggles.forEach(toggle => {
-        toggle.addEventListener('click', event => {
-          event.stopPropagation();
-          const targetMenuId = toggle.getAttribute('data-dropdown-toggle');
-          const targetMenu = document.getElementById(targetMenuId);
+        // --- Dropdown Menu Script ---
+        dropdownToggles.forEach(toggle => {
+          toggle.addEventListener('click', event => {
+            event.stopPropagation();
+            const targetMenuId = toggle.getAttribute('data-dropdown-toggle');
+            const targetMenu = document.getElementById(targetMenuId);
 
-          // 他のメニューをすべて非表示
-          document.querySelectorAll('.absolute.z-10').forEach(menu => {
-            if (menu.id !== targetMenuId) {
-              menu.classList.add('hidden');
-            }
+            document.querySelectorAll('.absolute.z-10').forEach(menu => {
+              if (menu.id !== targetMenuId) menu.classList.add('hidden');
+            });
+            targetMenu.classList.toggle('hidden');
+          });
+        });
+
+        window.addEventListener('click', () => {
+          document
+            .querySelectorAll('.absolute.z-10')
+            .forEach(menu => menu.classList.add('hidden'));
+        });
+
+        // --- JSON Tree View Logic ---
+        const createValueElement = value => {
+          const valueSpan = document.createElement('span');
+          const type = typeof value;
+          let valueText = value;
+          let typeClass = '';
+          if (value === null) {
+            typeClass = 'text-slate-500';
+            valueText = 'null';
+          } else if (type === 'string') {
+            typeClass = 'text-orange-400';
+            valueText = `"${value}"`;
+          } else if (type === 'number') {
+            typeClass = 'text-green-400';
+          } else if (type === 'boolean') {
+            typeClass = 'text-blue-400';
+          }
+          valueSpan.className = `ml-2 ${typeClass}`;
+          valueSpan.textContent = valueText;
+          return valueSpan;
+        };
+
+        const buildNode = (key, value, path, parentType = 'object') => {
+          const li = document.createElement('li');
+          const type = Object.prototype.toString
+            .call(value)
+            .slice(8, -1)
+            .toLowerCase();
+
+          li.addEventListener('mouseover', e => {
+            e.stopPropagation();
+            if (activeNode)
+              activeNode.classList.remove('bg-slate-800/50', 'rounded-md');
+            li.classList.add('bg-slate-800/50', 'rounded-md');
+            activeNode = li;
+            jsonPath.textContent = `Path: ${path}`;
           });
 
-          // クリックされたメニューの表示/非表示を切り替え
-          targetMenu.classList.toggle('hidden');
-        });
-      });
+          if (type === 'object' || type === 'array') {
+            const isObject = type === 'object';
+            const childCount = Object.keys(value).length;
+            const header = document.createElement('span');
+            header.className = 'text-cyan-400 cursor-pointer hover:underline';
+            const icon = document.createElement('i');
+            icon.className = 'fa-solid fa-caret-down mr-1.5';
+            header.appendChild(icon);
 
-      // メニュー外をクリックしたときにメニューを閉じる
-      window.addEventListener('click', event => {
-        document.querySelectorAll('.absolute.z-10').forEach(menu => {
-          if (!menu.classList.contains('hidden')) {
-            menu.classList.add('hidden');
+            let keyText =
+              path === 'root'
+                ? '{ } root'
+                : parentType === 'array'
+                ? `[${key}]`
+                : `"${key}"`;
+            header.appendChild(document.createTextNode(keyText));
+
+            const info = document.createElement('span');
+            info.className = 'text-slate-500 text-xs ml-2';
+            info.textContent = isObject
+              ? `Object[${childCount}]`
+              : `Array[${childCount}]`;
+
+            li.appendChild(header);
+            li.appendChild(info);
+
+            const childrenUl = document.createElement('ul');
+            childrenUl.className = 'space-y-1 pt-1';
+
+            if (childCount > 0) {
+              li.appendChild(childrenUl);
+              Object.keys(value).forEach(childKey => {
+                const newPath = isObject
+                  ? `${path}.${childKey}`
+                  : `${path}[${childKey}]`;
+                childrenUl.appendChild(
+                  buildNode(childKey, value[childKey], newPath, type)
+                );
+              });
+            }
+
+            header.addEventListener('click', e => {
+              e.stopPropagation();
+              childrenUl.classList.toggle('hidden');
+              icon.classList.toggle('fa-caret-down');
+              icon.classList.toggle('fa-caret-right');
+            });
+          } else {
+            const keySpan = document.createElement('span');
+            keySpan.className =
+              parentType === 'array' ? 'text-cyan-400' : 'text-purple-400';
+            keySpan.textContent =
+              parentType === 'array' ? `[${key}]:` : `"${key}":`;
+
+            li.appendChild(keySpan);
+            li.appendChild(createValueElement(value));
+            li.appendChild(document.createTextNode(' '));
+            const typeSpan = document.createElement('span');
+            typeSpan.className = 'text-slate-500 text-xs';
+            typeSpan.textContent = typeof value;
+            li.appendChild(typeSpan);
           }
+          return li;
+        };
+
+        const renderJsonTree = () => {
+          const jsonString = codeInput.value;
+          treeViewContainer.innerHTML = '';
+          if (activeNode) {
+            activeNode.classList.remove('bg-slate-800/50', 'rounded-md');
+            activeNode = null;
+          }
+
+          if (!jsonString.trim()) {
+            jsonStatus.innerHTML =
+              '<i class="fa-solid fa-circle-info text-slate-500"></i> Waiting for input';
+            jsonPath.textContent = 'Path:';
+            jsonNodes.textContent = 'Nodes: 0';
+            jsonSize.textContent = 'Size: 0 B';
+            return;
+          }
+
+          try {
+            const data = JSON.parse(jsonString);
+            const rootUl = document.createElement('ul');
+            rootUl.className = 'space-y-1';
+            rootUl.appendChild(buildNode('root', data, 'root', null));
+            treeViewContainer.appendChild(rootUl);
+            jsonStatus.innerHTML =
+              '<i class="fa-solid fa-check-circle text-green-500"></i> Valid';
+            jsonNodes.textContent = `Nodes: ${countNodes(data)}`;
+            jsonSize.textContent = `Size: ${formatBytes(jsonString.length)}`;
+            jsonPath.textContent = 'Path: root';
+          } catch (e) {
+            jsonStatus.innerHTML = `<i class="fa-solid fa-xmark-circle text-red-500"></i> Invalid JSON`;
+            treeViewContainer.innerHTML = `<div class="text-red-400 p-2 font-mono">${e.message}</div>`;
+            jsonNodes.textContent = 'Nodes: 0';
+            jsonSize.textContent = 'Size: 0 B';
+            jsonPath.textContent = 'Path:';
+          }
+        };
+
+        // --- Initial Setup & Event Binding ---
+        codeInput.addEventListener('input', () => {
+          updateLineNumbers();
+          renderJsonTree();
         });
+
+        // Initial call
+        updateLineNumbers();
+        renderJsonTree();
       });
     </script>
   </body>
