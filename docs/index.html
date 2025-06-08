@@ -232,12 +232,14 @@
           <div class="text-sm font-semibold text-slate-300">Code</div>
           <div class="flex items-center gap-1">
             <button
+              id="upload-button"
               title="Upload File"
               class="px-2 py-1 text-slate-400 hover:bg-slate-700 hover:text-white rounded"
             >
               <i class="fa-solid fa-cloud-arrow-up"></i>
             </button>
             <button
+              id="url-button"
               title="Fetch from URL"
               class="px-2 py-1 text-slate-400 hover:bg-slate-700 hover:text-white rounded"
             >
@@ -245,24 +247,28 @@
             </button>
             <div class="w-px h-5 bg-slate-700 mx-1"></div>
             <button
+              id="format-button"
               title="Format"
               class="px-2 py-1 text-slate-400 hover:bg-slate-700 hover:text-white rounded"
             >
               <i class="fa-solid fa-align-left"></i>
             </button>
             <button
+              id="minify-button"
               title="Minify"
               class="px-2 py-1 text-slate-400 hover:bg-slate-700 hover:text-white rounded"
             >
               <i class="fa-solid fa-compress"></i>
             </button>
             <button
+              id="copy-button"
               title="Copy"
               class="px-2 py-1 text-slate-400 hover:bg-slate-700 hover:text-white rounded"
             >
               <i class="fa-solid fa-copy"></i>
             </button>
             <button
+              id="clear-button"
               title="Clear"
               class="px-2 py-1 text-red-500/80 hover:bg-red-500/20 hover:text-red-500 rounded"
             >
@@ -373,6 +379,12 @@
         const jsonNodesEl = document.getElementById('json-nodes');
         const jsonSizeEl = document.getElementById('json-size');
 
+        // --- MODIFIED: Button References ---
+        const formatButton = document.getElementById('format-button');
+        const minifyButton = document.getElementById('minify-button');
+        const copyButton = document.getElementById('copy-button');
+        const clearButton = document.getElementById('clear-button');
+
         // --- Application State Management ---
         const appState = {
           jsonString: codeInput.value,
@@ -453,7 +465,6 @@
             const header = document.createElement('span');
             header.className = 'text-cyan-400 cursor-pointer hover:underline';
             const icon = document.createElement('i');
-            // MODIFIED: Start with collapsed icon
             icon.className = 'fa-solid fa-caret-right mr-1.5';
             header.appendChild(icon);
 
@@ -475,7 +486,6 @@
             li.appendChild(info);
 
             const childrenUl = document.createElement('ul');
-            // MODIFIED: Start in a hidden state
             childrenUl.className = 'space-y-1 pt-1 hidden';
 
             if (childCount > 0) {
@@ -638,10 +648,80 @@
           });
         };
 
+        // --- MODIFIED: Added Auto-Formatting and Button Logic ---
+
+        // Function to format the code in the editor
+        const formatCode = (indent = 2) => {
+          try {
+            if (!codeInput.value.trim()) return;
+            const currentJson = JSON.parse(codeInput.value);
+            codeInput.value = JSON.stringify(currentJson, null, indent);
+            // Manually trigger the input event to update everything
+            // This is the key to prevent degradation of other features
+            codeInput.dispatchEvent(new Event('input', { bubbles: true }));
+          } catch (error) {
+            // If JSON is invalid, do nothing. The existing UI shows an error.
+            console.log('Cannot format invalid JSON.');
+          }
+        };
+
+        // Auto-format on paste
+        codeInput.addEventListener('paste', e => {
+          // Prevent the default paste action to take control
+          e.preventDefault();
+
+          // Get pasted text from clipboard
+          const pastedText = (e.clipboardData || window.clipboardData).getData(
+            'text'
+          );
+
+          try {
+            // Check if pasted text is valid JSON
+            const parsedJson = JSON.parse(pastedText);
+            // If it is, format it beautifully and set it as the value
+            codeInput.value = JSON.stringify(parsedJson, null, 2);
+          } catch (error) {
+            // If not valid JSON, just paste the raw text as is
+            codeInput.value = pastedText;
+          }
+
+          // Trigger all update functions (highlighting, tree view, etc.)
+          // This ensures no degradation occurs.
+          codeInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        // Add functionality to the header buttons
+        formatButton.addEventListener('click', () => formatCode(2));
+        minifyButton.addEventListener('click', () => formatCode(0));
+
+        clearButton.addEventListener('click', () => {
+          codeInput.value = '';
+          codeInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        copyButton.addEventListener('click', () => {
+          if (!codeInput.value) return;
+          navigator.clipboard
+            .writeText(codeInput.value)
+            .then(() => {
+              const originalTitle = copyButton.title;
+              const icon = copyButton.querySelector('i');
+              copyButton.title = 'Copied!';
+              icon.className = 'fa-solid fa-check text-green-500';
+
+              setTimeout(() => {
+                copyButton.title = originalTitle;
+                icon.className = 'fa-solid fa-copy';
+              }, 2000);
+            })
+            .catch(err => console.error('Failed to copy text: ', err));
+        });
+
         // --- Initialization ---
         const initialize = () => {
           codeInput.addEventListener('input', handleCodeInput);
           initLegacyScripts();
+          // The initial call handles the pre-filled JSON
           handleCodeInput({ target: codeInput });
         };
 
