@@ -325,116 +325,109 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        // --- Element References ---
+        // --- DOM Element References ---
         const codeInput = document.getElementById('code-input');
         const lineNumbers = document.getElementById('line-numbers');
         const dropdownToggles = document.querySelectorAll(
           '[data-dropdown-toggle]'
         );
         const treeViewContainer = document.querySelector('.tree-view');
-        const jsonStatus = document.getElementById('json-status');
-        const jsonPath = document.getElementById('json-path');
-        const jsonNodes = document.getElementById('json-nodes');
-        const jsonSize = document.getElementById('json-size');
-        let activeNode = null;
+        const jsonStatusEl = document.getElementById('json-status');
+        const jsonPathEl = document.getElementById('json-path');
+        const jsonNodesEl = document.getElementById('json-nodes');
+        const jsonSizeEl = document.getElementById('json-size');
 
-        // --- Utility Functions ---
-        const formatBytes = (bytes, decimals = 2) => {
-          if (bytes === 0) return '0 B';
-          const k = 1024;
-          const dm = decimals < 0 ? 0 : decimals;
-          const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-          const i = Math.floor(Math.log(bytes) / Math.log(k));
-          return (
-            parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
-          );
+        // --- Application State Management ---
+        const appState = {
+          jsonString: codeInput.value,
+          parsedData: null,
+          error: null,
+          nodeCount: 0,
+          sizeInBytes: 0,
+          activePath: 'root',
+          activeNodeEl: null,
         };
 
-        const countNodes = data => {
-          if (data === null || typeof data !== 'object') {
-            return 1;
+        const setState = newState => {
+          Object.assign(appState, newState);
+          render();
+        };
+
+        // --- View Components (Render Functions) ---
+
+        /**
+         * Renders the entire application based on the current state.
+         */
+        const render = () => {
+          renderTreeView();
+          renderFooter();
+        };
+
+        /**
+         * Renders the footer section.
+         */
+        const renderFooter = () => {
+          jsonPathEl.textContent = `Path: ${appState.activePath}`;
+          jsonNodesEl.textContent = `Nodes: ${appState.nodeCount}`;
+          jsonSizeEl.textContent = `Size: ${formatBytes(appState.sizeInBytes)}`;
+
+          if (appState.error) {
+            jsonStatusEl.innerHTML = `<i class="fa-solid fa-xmark-circle text-red-500"></i> Invalid JSON`;
+          } else if (!appState.jsonString.trim()) {
+            jsonStatusEl.innerHTML =
+              '<i class="fa-solid fa-circle-info text-slate-500"></i> Waiting for input';
+          } else {
+            jsonStatusEl.innerHTML =
+              '<i class="fa-solid fa-check-circle text-green-500"></i> Valid';
           }
-          return Object.keys(data).reduce(
-            (acc, key) => acc + 1 + countNodes(data[key]),
-            0
-          );
         };
 
-        // --- Line Numbers Script ---
-        const updateLineNumbers = () => {
-          if (!codeInput || !lineNumbers) return;
-          const lineCount = codeInput.value.split('\n').length;
-          lineNumbers.innerHTML = Array.from(
-            { length: lineCount },
-            (_, i) => i + 1
-          ).join('\n');
-        };
-
-        codeInput.addEventListener('scroll', () => {
-          lineNumbers.scrollTop = codeInput.scrollTop;
-        });
-
-        // --- Dropdown Menu Script ---
-        dropdownToggles.forEach(toggle => {
-          toggle.addEventListener('click', event => {
-            event.stopPropagation();
-            const targetMenuId = toggle.getAttribute('data-dropdown-toggle');
-            const targetMenu = document.getElementById(targetMenuId);
-
-            document.querySelectorAll('.absolute.z-10').forEach(menu => {
-              if (menu.id !== targetMenuId) menu.classList.add('hidden');
-            });
-            targetMenu.classList.toggle('hidden');
-          });
-        });
-
-        window.addEventListener('click', () => {
-          document
-            .querySelectorAll('.absolute.z-10')
-            .forEach(menu => menu.classList.add('hidden'));
-        });
-
-        // --- JSON Tree View Logic ---
-        const createValueElement = value => {
-          const valueSpan = document.createElement('span');
-          const type = typeof value;
-          let valueText = value;
-          let typeClass = '';
-          if (value === null) {
-            typeClass = 'text-slate-500';
-            valueText = 'null';
-          } else if (type === 'string') {
-            typeClass = 'text-orange-400';
-            valueText = `"${value}"`;
-          } else if (type === 'number') {
-            typeClass = 'text-green-400';
-          } else if (type === 'boolean') {
-            typeClass = 'text-blue-400';
+        /**
+         * Renders the main tree view section.
+         */
+        const renderTreeView = () => {
+          treeViewContainer.innerHTML = '';
+          if (appState.error) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'text-red-400 p-2 font-mono';
+            errorDiv.textContent = appState.error.message;
+            treeViewContainer.appendChild(errorDiv);
+            return;
           }
-          valueSpan.className = `ml-2 ${typeClass}`;
-          valueSpan.textContent = valueText;
-          return valueSpan;
+          if (appState.parsedData) {
+            const rootUl = document.createElement('ul');
+            rootUl.className = 'space-y-1';
+            rootUl.appendChild(
+              createTreeNode({
+                key: 'root',
+                value: appState.parsedData,
+                path: 'root',
+                parentType: null,
+              })
+            );
+            treeViewContainer.appendChild(rootUl);
+          }
         };
 
-        const buildNode = (key, value, path, parentType = 'object') => {
+        /**
+         * Creates a DOM element for a single node in the JSON tree.
+         * @param {object} props - Properties for the node.
+         * @returns {HTMLLIElement}
+         */
+        const createTreeNode = props => {
+          const { key, value, path, parentType } = props;
           const li = document.createElement('li');
           const type = Object.prototype.toString
             .call(value)
             .slice(8, -1)
             .toLowerCase();
 
-          li.addEventListener('mouseover', e => {
-            e.stopPropagation();
-            if (activeNode)
-              activeNode.classList.remove('bg-slate-800/50', 'rounded-md');
-            li.classList.add('bg-slate-800/50', 'rounded-md');
-            activeNode = li;
-            jsonPath.textContent = `Path: ${path}`;
-          });
+          li.addEventListener('mouseover', e => handleNodeHover(e, li, path));
 
           if (type === 'object' || type === 'array') {
             const isObject = type === 'object';
             const childCount = Object.keys(value).length;
+
             const header = document.createElement('span');
             header.className = 'text-cyan-400 cursor-pointer hover:underline';
             const icon = document.createElement('i');
@@ -468,7 +461,12 @@
                   ? `${path}.${childKey}`
                   : `${path}[${childKey}]`;
                 childrenUl.appendChild(
-                  buildNode(childKey, value[childKey], newPath, type)
+                  createTreeNode({
+                    key: childKey,
+                    value: value[childKey],
+                    path: newPath,
+                    parentType: type,
+                  })
                 );
               });
             }
@@ -488,61 +486,136 @@
 
             li.appendChild(keySpan);
             li.appendChild(createValueElement(value));
-            li.appendChild(document.createTextNode(' '));
             const typeSpan = document.createElement('span');
-            typeSpan.className = 'text-slate-500 text-xs';
+            typeSpan.className = 'text-slate-500 text-xs ml-3';
             typeSpan.textContent = typeof value;
             li.appendChild(typeSpan);
           }
           return li;
         };
 
-        const renderJsonTree = () => {
-          const jsonString = codeInput.value;
-          treeViewContainer.innerHTML = '';
-          if (activeNode) {
-            activeNode.classList.remove('bg-slate-800/50', 'rounded-md');
-            activeNode = null;
+        const createValueElement = value => {
+          const valueSpan = document.createElement('span');
+          const type = typeof value;
+          let valueText = value;
+          let typeClass = '';
+          if (value === null) {
+            typeClass = 'text-slate-500';
+            valueText = 'null';
+          } else if (type === 'string') {
+            typeClass = 'text-orange-400';
+            valueText = `"${value}"`;
+          } else if (type === 'number') {
+            typeClass = 'text-green-400';
+          } else if (type === 'boolean') {
+            typeClass = 'text-blue-400';
           }
-
-          if (!jsonString.trim()) {
-            jsonStatus.innerHTML =
-              '<i class="fa-solid fa-circle-info text-slate-500"></i> Waiting for input';
-            jsonPath.textContent = 'Path:';
-            jsonNodes.textContent = 'Nodes: 0';
-            jsonSize.textContent = 'Size: 0 B';
-            return;
-          }
-
-          try {
-            const data = JSON.parse(jsonString);
-            const rootUl = document.createElement('ul');
-            rootUl.className = 'space-y-1';
-            rootUl.appendChild(buildNode('root', data, 'root', null));
-            treeViewContainer.appendChild(rootUl);
-            jsonStatus.innerHTML =
-              '<i class="fa-solid fa-check-circle text-green-500"></i> Valid';
-            jsonNodes.textContent = `Nodes: ${countNodes(data)}`;
-            jsonSize.textContent = `Size: ${formatBytes(jsonString.length)}`;
-            jsonPath.textContent = 'Path: root';
-          } catch (e) {
-            jsonStatus.innerHTML = `<i class="fa-solid fa-xmark-circle text-red-500"></i> Invalid JSON`;
-            treeViewContainer.innerHTML = `<div class="text-red-400 p-2 font-mono">${e.message}</div>`;
-            jsonNodes.textContent = 'Nodes: 0';
-            jsonSize.textContent = 'Size: 0 B';
-            jsonPath.textContent = 'Path:';
-          }
+          valueSpan.className = `ml-2 ${typeClass}`;
+          valueSpan.textContent = valueText;
+          return valueSpan;
         };
 
-        // --- Initial Setup & Event Binding ---
-        codeInput.addEventListener('input', () => {
-          updateLineNumbers();
-          renderJsonTree();
-        });
+        // --- Event Handlers ---
 
-        // Initial call
-        updateLineNumbers();
-        renderJsonTree();
+        const handleCodeInput = e => {
+          const jsonString = e.target.value;
+          let newState = { jsonString, sizeInBytes: jsonString.length };
+          try {
+            const data = jsonString.trim() ? JSON.parse(jsonString) : null;
+            newState = {
+              ...newState,
+              parsedData: data,
+              error: null,
+              nodeCount: data ? countNodes(data) : 0,
+            };
+          } catch (err) {
+            newState = {
+              ...newState,
+              parsedData: null,
+              error: err,
+              nodeCount: 0,
+            };
+          }
+          setState(newState);
+        };
+
+        const handleNodeHover = (e, element, path) => {
+          e.stopPropagation();
+          if (appState.activeNodeEl)
+            appState.activeNodeEl.classList.remove(
+              'bg-slate-800/50',
+              'rounded-md'
+            );
+          element.classList.add('bg-slate-800/50', 'rounded-md');
+          // Update state without causing a full re-render for this minor UI change
+          appState.activeNodeEl = element;
+          appState.activePath = path;
+          renderFooter(); // Only re-render the footer for performance
+        };
+
+        // --- Utility Functions ---
+        const formatBytes = (bytes, decimals = 2) => {
+          if (bytes === 0) return '0 B';
+          const k = 1024;
+          const dm = decimals < 0 ? 0 : decimals;
+          const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return (
+            parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
+          );
+        };
+
+        const countNodes = data => {
+          if (data === null || typeof data !== 'object') return 1;
+          return Object.keys(data).reduce(
+            (acc, key) => acc + 1 + countNodes(data[key]),
+            0
+          );
+        };
+
+        // --- Legacy & Non-Component Scripts ---
+        const initLegacyScripts = () => {
+          const updateLineNumbers = () => {
+            if (!codeInput || !lineNumbers) return;
+            const lineCount = codeInput.value.split('\n').length;
+            lineNumbers.innerHTML = Array.from(
+              { length: lineCount },
+              (_, i) => i + 1
+            ).join('\n');
+          };
+          codeInput.addEventListener('input', updateLineNumbers);
+          codeInput.addEventListener('scroll', () => {
+            lineNumbers.scrollTop = codeInput.scrollTop;
+          });
+          updateLineNumbers();
+
+          dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', event => {
+              event.stopPropagation();
+              const targetMenuId = toggle.getAttribute('data-dropdown-toggle');
+              const targetMenu = document.getElementById(targetMenuId);
+              document.querySelectorAll('.absolute.z-10').forEach(menu => {
+                if (menu.id !== targetMenuId) menu.classList.add('hidden');
+              });
+              targetMenu.classList.toggle('hidden');
+            });
+          });
+          window.addEventListener('click', () => {
+            document
+              .querySelectorAll('.absolute.z-10')
+              .forEach(menu => menu.classList.add('hidden'));
+          });
+        };
+
+        // --- Initialization ---
+        const initialize = () => {
+          codeInput.addEventListener('input', handleCodeInput);
+          initLegacyScripts();
+          // Trigger initial state processing
+          handleCodeInput({ target: codeInput });
+        };
+
+        initialize();
       });
     </script>
   </body>
