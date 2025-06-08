@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JSONビューアー - Phase 1 UIモックアップ</title>
+    <title>JSON Viewer - Professional Toolkit</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -13,83 +13,188 @@
       body {
         font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'メイリオ',
           Meiryo, 'MS PGothic', sans-serif;
+        counter-reset: line;
       }
       .font-mono {
         font-family: 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
       }
       /* スクロールバーのスタイル */
       ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
       }
       ::-webkit-scrollbar-track {
-        background: #1e293b; /* bg-slate-800 */
+        background: #0f172a; /* bg-slate-900 */
       }
       ::-webkit-scrollbar-thumb {
-        background: #475569; /* bg-slate-600 */
-        border-radius: 4px;
+        background: #334155; /* bg-slate-700 */
+        border-radius: 5px;
+        border: 2px solid #0f172a;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #64748b; /* bg-slate-500 */
+        background: #475569; /* bg-slate-600 */
+      }
+
+      /* 行番号 */
+      .line-numbers-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        padding: 1rem 0.75rem;
+        color: #64748b; /* text-slate-500 */
+        text-align: right;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        white-space: pre;
+        overflow: hidden;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      /* ツリービューのインデントガイド */
+      .tree-view ul {
+        padding-left: 1.5rem;
+        border-left: 1px solid #334155; /* border-slate-700 */
+      }
+      .tree-view li {
+        position: relative;
       }
     </style>
   </head>
   <body class="bg-slate-900 text-slate-300 flex flex-col h-screen">
     <header
-      class="flex items-center justify-between px-4 py-2 border-b border-slate-700 bg-slate-800"
+      class="flex items-center justify-between px-3 py-1.5 border-b border-slate-700 bg-slate-800 text-sm"
     >
-      <div class="flex items-center gap-3">
-        <i class="fa-solid fa-code text-cyan-400 text-xl"></i>
-        <h1 class="text-lg font-bold text-slate-100">JSON開発ツール</h1>
-      </div>
       <div class="flex items-center gap-4">
-        <button
-          class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-md text-sm transition-colors flex items-center gap-2"
-        >
-          <i class="fa-solid fa-align-left text-xs"></i>整形
-        </button>
-        <button
-          class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-md text-sm transition-colors flex items-center gap-2"
-        >
-          <i class="fa-solid fa-compress text-xs"></i>圧縮
-        </button>
-        <button
-          class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-md text-sm transition-colors flex items-center gap-2"
-        >
-          <i class="fa-solid fa-copy text-xs"></i>コピー
-        </button>
-        <button
-          class="px-3 py-1 bg-red-800 hover:bg-red-700 rounded-md text-sm transition-colors flex items-center gap-2"
-        >
-          <i class="fa-solid fa-trash text-xs"></i>クリア
-        </button>
-      </div>
-      <div class="flex items-center gap-2">
-        <div class="flex items-center gap-4">
-          <i
-            class="fa-solid fa-cloud-arrow-up text-lg text-slate-400 hover:text-white cursor-pointer"
-            title="ファイルアップロード"
-          ></i>
-          <i
-            class="fa-solid fa-link text-lg text-slate-400 hover:text-white cursor-pointer"
-            title="URLから取得"
-          ></i>
-        </div>
-
-        <div class="h-5 w-px bg-slate-600 mx-2"></div>
-
         <div class="flex items-center gap-2">
-          <button
-            class="px-3 py-1 rounded-md hover:bg-slate-700 transition-colors text-sm"
-          >
-            ログイン
-          </button>
-          <button
-            class="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded-md transition-colors text-sm font-semibold"
-          >
-            新規登録
-          </button>
+          <i class="fa-solid fa-code text-cyan-400 text-lg"></i>
+          <span class="font-bold text-slate-100">JSON Viewer</span>
         </div>
+        <div class="flex items-center gap-1 text-slate-300">
+          <div class="relative">
+            <button
+              data-dropdown-toggle="file-menu"
+              class="px-2 py-1 rounded hover:bg-slate-700"
+            >
+              File
+            </button>
+            <div
+              id="file-menu"
+              class="hidden absolute top-full mt-2 w-56 bg-slate-800 border border-slate-600 rounded-md shadow-lg z-10 text-sm"
+            >
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span
+                  ><i class="fa-solid fa-file-circle-plus w-6"></i>New
+                  File</span
+                ></a
+              >
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span
+                  ><i class="fa-solid fa-folder-open w-6"></i>Open File...</span
+                ></a
+              >
+              <div class="h-px bg-slate-700 my-1"></div>
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span><i class="fa-solid fa-floppy-disk w-6"></i>Save</span></a
+              >
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span
+                  ><i class="fa-solid fa-file-export w-6"></i>Export As...</span
+                ></a
+              >
+            </div>
+          </div>
+          <div class="relative">
+            <button
+              data-dropdown-toggle="view-menu"
+              class="px-2 py-1 rounded hover:bg-slate-700"
+            >
+              View
+            </button>
+            <div
+              id="view-menu"
+              class="hidden absolute top-full mt-2 w-56 bg-slate-800 border border-slate-600 rounded-md shadow-lg z-10 text-sm"
+            >
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span
+                  ><i class="fa-solid fa-magnifying-glass w-6"></i>Command
+                  Palette...</span
+                ></a
+              >
+              <div class="h-px bg-slate-700 my-1"></div>
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span
+                  ><i class="fa-solid fa-text-width w-6"></i>Word Wrap</span
+                ></a
+              >
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span
+                  ><i class="fa-solid fa-palette w-6"></i>Toggle Theme</span
+                ></a
+              >
+            </div>
+          </div>
+          <div class="relative">
+            <button
+              data-dropdown-toggle="tools-menu"
+              class="px-2 py-1 rounded hover:bg-slate-700"
+            >
+              Tools
+            </button>
+            <div
+              id="tools-menu"
+              class="hidden absolute top-full mt-2 w-56 bg-slate-800 border border-slate-600 rounded-md shadow-lg z-10 text-sm"
+            >
+              <a
+                href="#"
+                class="flex items-center justify-between px-3 py-2 hover:bg-slate-700"
+                ><span
+                  ><i class="fa-solid fa-terminal w-6"></i>JSON Query (jq)</span
+                ><span class="text-xs text-slate-500">SOON</span></a
+              >
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span
+                  ><i class="fa-solid fa-sitemap w-6"></i>JSON Schema</span
+                ></a
+              >
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span
+                  ><i class="fa-solid fa-magnifying-glass-location w-6"></i>JSON
+                  Path</span
+                ></a
+              >
+              <div class="h-px bg-slate-700 my-1"></div>
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span><i class="fa-solid fa-key w-6"></i>Decode JWT</span></a
+              >
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span
+                  ><i class="fa-solid fa-wand-magic-sparkles w-6"></i>Generate
+                  Type</span
+                ></a
+              >
+              <div class="h-px bg-slate-700 my-1"></div>
+              <a href="#" class="flex items-center px-3 py-2 hover:bg-slate-700"
+                ><span
+                  ><i class="fa-solid fa-shuffle w-6"></i>Randomize Data</span
+                ></a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button
+          class="px-3 py-1 rounded-md hover:bg-slate-700 transition-colors text-sm"
+        >
+          ログイン
+        </button>
+        <button
+          class="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded-md transition-colors text-sm font-semibold"
+        >
+          新規登録
+        </button>
       </div>
     </header>
 
@@ -97,13 +202,57 @@
       class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-700 overflow-hidden"
     >
       <div class="bg-slate-800 flex flex-col overflow-hidden">
-        <div class="p-2 border-b border-slate-700 text-sm font-semibold">
-          コードビュー
+        <div
+          class="p-2 border-b border-slate-700 flex justify-between items-center h-11"
+        >
+          <div class="text-sm font-semibold text-slate-300">Code</div>
+          <div class="flex items-center gap-1">
+            <button
+              title="Upload File"
+              class="px-2 py-1 text-slate-400 hover:bg-slate-700 hover:text-white rounded"
+            >
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </button>
+            <button
+              title="Fetch from URL"
+              class="px-2 py-1 text-slate-400 hover:bg-slate-700 hover:text-white rounded"
+            >
+              <i class="fa-solid fa-link"></i>
+            </button>
+            <div class="w-px h-5 bg-slate-700 mx-1"></div>
+            <button
+              title="Format"
+              class="px-2 py-1 text-slate-400 hover:bg-slate-700 hover:text-white rounded"
+            >
+              <i class="fa-solid fa-align-left"></i>
+            </button>
+            <button
+              title="Minify"
+              class="px-2 py-1 text-slate-400 hover:bg-slate-700 hover:text-white rounded"
+            >
+              <i class="fa-solid fa-compress"></i>
+            </button>
+            <button
+              title="Copy"
+              class="px-2 py-1 text-slate-400 hover:bg-slate-700 hover:text-white rounded"
+            >
+              <i class="fa-solid fa-copy"></i>
+            </button>
+            <button
+              title="Clear"
+              class="px-2 py-1 text-red-500/80 hover:bg-red-500/20 hover:text-red-500 rounded"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
         </div>
         <div class="flex-grow relative">
+          <div id="line-numbers" class="line-numbers-wrapper"></div>
           <textarea
+            id="code-input"
             class="font-mono text-sm w-full h-full p-4 bg-transparent text-slate-300 resize-none absolute top-0 left-0 focus:outline-none"
-            placeholder="ここにJSONを貼り付け、またはファイルをドラッグ＆ドロップしてください"
+            style="padding-left: 4rem"
+            placeholder="Paste your JSON here"
           >
 {
     "id": "001",
@@ -130,140 +279,143 @@
     ],
     "last_updated": "2025-06-08T12:57:00Z",
     "image_url": "https://example.com/donut.png"
-}
-                </textarea
+}</textarea
           >
         </div>
       </div>
 
-      <div class="bg-slate-800 flex flex-col overflow-hidden">
+      <div class="bg-slate-900 flex flex-col overflow-hidden">
         <div
-          class="p-2 border-b border-slate-700 flex justify-between items-center"
+          class="p-2 border-b border-slate-700 flex justify-between items-center h-11"
         >
-          <div class="text-sm font-semibold">ツリービュー</div>
+          <div class="text-sm font-semibold text-slate-300">Tree</div>
           <div class="relative">
             <input
               type="text"
-              placeholder="キーまたは値を検索..."
-              class="font-mono text-xs w-48 bg-slate-900 border border-slate-700 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              placeholder="Search key or value..."
+              class="font-mono text-xs w-52 bg-slate-800 border border-slate-700 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             />
             <i
               class="fa-solid fa-magnifying-glass absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 text-xs"
             ></i>
           </div>
         </div>
-        <div class="flex-grow p-4 overflow-y-auto font-mono text-sm">
+        <div class="flex-grow p-4 overflow-y-auto font-mono text-sm tree-view">
           <ul class="space-y-1">
             <li>
               <span class="text-cyan-400 cursor-pointer hover:underline"
-                ><i class="fa-solid fa-caret-down mr-1"></i>{ } root</span
+                ><i class="fa-solid fa-caret-down mr-1.5"></i>{ } root</span
               >
-              <span class="text-slate-500 text-xs">Object[7]</span>
-            </li>
-            <li class="ml-6">
-              <span class="text-purple-400 w-20 inline-block">"id":</span>
-              <span class="text-orange-400">"001"</span>
-              <span class="text-slate-500 text-xs ml-2">string</span>
-            </li>
-            <li class="ml-6">
-              <span class="text-purple-400 w-20 inline-block">"type":</span>
-              <span class="text-orange-400">"donut"</span>
-              <span class="text-slate-500 text-xs ml-2">string</span>
-            </li>
-            <li class="ml-6">
-              <span class="text-purple-400 w-20 inline-block">"name":</span>
-              <span class="text-orange-400">"Cake"</span>
-              <span class="text-slate-500 text-xs ml-2">string</span>
-            </li>
-            <li class="ml-6">
-              <span class="text-purple-400 w-20 inline-block">"ppu":</span>
-              <span class="text-green-400">0.55</span>
-              <span class="text-slate-500 text-xs ml-2">number</span>
-            </li>
-            <li class="ml-6">
-              <span class="text-purple-400 w-20 inline-block"
-                >"available":</span
-              >
-              <span class="text-blue-400">true</span>
-              <span class="text-slate-500 text-xs ml-2">boolean</span>
-            </li>
-            <li class="ml-6">
-              <span class="text-cyan-400 cursor-pointer hover:underline"
-                ><i class="fa-solid fa-caret-down mr-1"></i>"batters":</span
-              >
-              <span class="text-slate-500 text-xs">Object[1]</span>
-            </li>
-            <li class="ml-12">
-              <span class="text-cyan-400 cursor-pointer hover:underline"
-                ><i class="fa-solid fa-caret-right mr-1"></i>"batter":</span
-              >
-              <span class="text-slate-500 text-xs">Array[4]</span>
-            </li>
-            <li
-              class="ml-6 bg-slate-700/50 rounded p-2 border-l-2 border-cyan-400"
-            >
-              <span class="text-cyan-400 cursor-pointer hover:underline"
-                ><i class="fa-solid fa-caret-down mr-1"></i>"topping":</span
-              >
-              <span class="text-slate-500 text-xs">Array[7]</span>
-              <ul class="space-y-1 mt-1">
-                <li class="ml-6">
-                  <span class="text-cyan-400 cursor-pointer hover:underline"
-                    ><i class="fa-solid fa-caret-right mr-1"></i>[0]:</span
-                  >
-                  <span class="text-slate-500 text-xs">Object[2]</span>
+              <span class="text-slate-500 text-xs ml-2">Object[7]</span>
+              <ul class="space-y-1 pt-1">
+                <li>
+                  <span class="text-purple-400">"id":</span>
+                  <span class="text-orange-400 ml-2">"001"</span>
+                  <span class="text-slate-500 text-xs ml-3">string</span>
                 </li>
-                <li class="ml-6">
-                  <span class="text-cyan-400 cursor-pointer hover:underline"
-                    ><i class="fa-solid fa-caret-right mr-1"></i>[1]:</span
-                  >
-                  <span class="text-slate-500 text-xs">Object[2]</span>
+                <li>
+                  <span class="text-purple-400">"type":</span>
+                  <span class="text-orange-400 ml-2">"donut"</span>
+                  <span class="text-slate-500 text-xs ml-3">string</span>
                 </li>
-                <li class="ml-6 bg-cyan-900/50 rounded">
+                <li>
+                  <span class="text-purple-400">"name":</span>
+                  <span class="text-orange-400 ml-2">"Cake"</span>
+                  <span class="text-slate-500 text-xs ml-3">string</span>
+                </li>
+                <li>
+                  <span class="text-purple-400">"ppu":</span>
+                  <span class="text-green-400 ml-2">0.55</span>
+                  <span class="text-slate-500 text-xs ml-3">number</span>
+                </li>
+                <li>
+                  <span class="text-purple-400">"available":</span>
+                  <span class="text-blue-400 ml-2">true</span>
+                  <span class="text-slate-500 text-xs ml-3">boolean</span>
+                </li>
+                <li>
                   <span class="text-cyan-400 cursor-pointer hover:underline"
-                    ><i class="fa-solid fa-caret-down mr-1"></i>[2]:</span
+                    ><i class="fa-solid fa-caret-down mr-1.5"></i
+                    >"batters"</span
                   >
-                  <span class="text-slate-500 text-xs">Object[2]</span>
-                  <ul class="space-y-1 mt-1">
-                    <li class="ml-6">
-                      <span class="text-purple-400 w-12 inline-block"
-                        >"id":</span
+                  <span class="text-slate-500 text-xs ml-2">Object[1]</span>
+                  <ul class="space-y-1 pt-1">
+                    <li>
+                      <span class="text-cyan-400 cursor-pointer hover:underline"
+                        ><i class="fa-solid fa-caret-right mr-1.5"></i
+                        >"batter"</span
                       >
-                      <span class="text-orange-400">"5005"</span>
-                    </li>
-                    <li class="ml-6">
-                      <span class="text-purple-400 w-12 inline-block"
-                        >"type":</span
-                      >
-                      <span class="text-orange-400">"Sugar"</span>
+                      <span class="text-slate-500 text-xs ml-2">Array[4]</span>
                     </li>
                   </ul>
                 </li>
+                <li
+                  class="bg-slate-800/50 rounded-md border-l-2 border-cyan-500 -ml-4 pl-4"
+                >
+                  <span class="text-cyan-400 cursor-pointer hover:underline"
+                    ><i class="fa-solid fa-caret-down mr-1.5"></i
+                    >"topping"</span
+                  >
+                  <span class="text-slate-500 text-xs ml-2">Array[7]</span>
+                  <ul class="space-y-1 pt-1">
+                    <li>
+                      <span class="text-cyan-400 cursor-pointer hover:underline"
+                        ><i class="fa-solid fa-caret-right mr-1.5"></i>[0]</span
+                      >
+                      <span class="text-slate-500 text-xs ml-2">Object[2]</span>
+                    </li>
+                    <li>
+                      <span class="text-cyan-400 cursor-pointer hover:underline"
+                        ><i class="fa-solid fa-caret-right mr-1.5"></i>[1]</span
+                      >
+                      <span class="text-slate-500 text-xs ml-2">Object[2]</span>
+                    </li>
+                    <li class="bg-cyan-500/10 rounded-md">
+                      <span class="text-cyan-400 cursor-pointer hover:underline"
+                        ><i class="fa-solid fa-caret-down mr-1.5"></i>[2]</span
+                      >
+                      <span class="text-slate-500 text-xs ml-2">Object[2]</span>
+                      <ul class="space-y-1 pt-1">
+                        <li>
+                          <span class="text-purple-400">"id":</span>
+                          <span class="text-orange-400 ml-2">"5005"</span>
+                        </li>
+                        <li>
+                          <span class="text-purple-400">"type":</span>
+                          <span class="text-orange-400 ml-2">"Sugar"</span>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <span class="text-purple-400">"last_updated":</span>
+                  <a
+                    href="#"
+                    class="text-orange-400 ml-2 underline decoration-dotted hover:text-orange-300"
+                    >"2025-06-08T12:57:00Z"</a
+                  >
+                  <span class="text-slate-500 text-xs ml-3"
+                    >string
+                    <i
+                      class="fa-solid fa-clock ml-1"
+                      title="Date-time format"
+                    ></i
+                  ></span>
+                </li>
+                <li>
+                  <span class="text-purple-400">"image_url":</span>
+                  <a
+                    href="#"
+                    class="text-orange-400 ml-2 underline decoration-dotted hover:text-orange-300"
+                    >"https://example.com/donut.png"</a
+                  >
+                  <span class="text-slate-500 text-xs ml-3"
+                    >string
+                    <i class="fa-solid fa-image ml-1" title="Image URL"></i
+                  ></span>
+                </li>
               </ul>
-            </li>
-            <li class="ml-6">
-              <span class="text-purple-400 w-20 inline-block"
-                >"last_updated":</span
-              >
-              <span class="text-orange-400">"2025-06-08T12:57:00Z"</span>
-              <span class="text-slate-500 text-xs ml-2"
-                >string
-                <i class="fa-solid fa-clock ml-1" title="日付として認識"></i
-              ></span>
-            </li>
-            <li class="ml-6">
-              <span class="text-purple-400 w-20 inline-block"
-                >"image_url":</span
-              >
-              <a
-                href="#"
-                class="text-orange-400 underline hover:text-orange-300"
-                >"https://example.com/donut.png"</a
-              >
-              <span class="text-slate-500 text-xs ml-2"
-                >string
-                <i class="fa-solid fa-image ml-1" title="画像URLとして認識"></i
-              ></span>
             </li>
           </ul>
         </div>
@@ -271,15 +423,73 @@
     </main>
 
     <footer
-      class="flex items-center justify-between px-4 py-1 border-t border-slate-700 bg-slate-800 text-xs font-mono"
+      class="flex items-center justify-between px-4 py-1 border-t border-slate-700 bg-slate-800 text-xs font-mono text-slate-400"
     >
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-check-circle text-green-500"></i>
-        <span>有効なJSONです</span>
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-2">
+          <i class="fa-solid fa-check-circle text-green-500"></i>
+          Valid
+        </span>
+        <span>Path: root.topping[2]</span>
       </div>
-      <div class="text-slate-400">
-        <span>パス: root.topping[2]</span>
+      <div class="flex items-center gap-4">
+        <span>Nodes: 25</span>
+        <span>Size: 587 B</span>
       </div>
     </footer>
+
+    <script>
+      // --- 行番号を生成する簡易スクリプト ---
+      const codeInput = document.getElementById('code-input');
+      const lineNumbers = document.getElementById('line-numbers');
+
+      const updateLineNumbers = () => {
+        if (!codeInput || !lineNumbers) return;
+        const lineCount = codeInput.value.split('\n').length;
+        lineNumbers.innerHTML = Array.from(
+          { length: lineCount },
+          (_, i) => i + 1
+        ).join('\n');
+      };
+
+      codeInput.addEventListener('input', updateLineNumbers);
+      codeInput.addEventListener('scroll', () => {
+        lineNumbers.scrollTop = codeInput.scrollTop;
+      });
+
+      updateLineNumbers();
+
+      // --- ドロップダウンメニューの制御スクリプト ---
+      const dropdownToggles = document.querySelectorAll(
+        '[data-dropdown-toggle]'
+      );
+
+      dropdownToggles.forEach(toggle => {
+        toggle.addEventListener('click', event => {
+          event.stopPropagation();
+          const targetMenuId = toggle.getAttribute('data-dropdown-toggle');
+          const targetMenu = document.getElementById(targetMenuId);
+
+          // 他のメニューをすべて非表示
+          document.querySelectorAll('.absolute.z-10').forEach(menu => {
+            if (menu.id !== targetMenuId) {
+              menu.classList.add('hidden');
+            }
+          });
+
+          // クリックされたメニューの表示/非表示を切り替え
+          targetMenu.classList.toggle('hidden');
+        });
+      });
+
+      // メニュー外をクリックしたときにメニューを閉じる
+      window.addEventListener('click', event => {
+        document.querySelectorAll('.absolute.z-10').forEach(menu => {
+          if (!menu.classList.contains('hidden')) {
+            menu.classList.add('hidden');
+          }
+        });
+      });
+    </script>
   </body>
 </html>
