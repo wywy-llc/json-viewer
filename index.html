@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSONビューアー - Phase 1 UIモックアップ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'メイリオ',
+          Meiryo, 'MS PGothic', sans-serif;
+      }
+      .font-mono {
+        font-family: 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
+      }
+      /* スクロールバーのスタイル */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1e293b; /* bg-slate-800 */
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #475569; /* bg-slate-600 */
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #64748b; /* bg-slate-500 */
+      }
+    </style>
+  </head>
+  <body class="bg-slate-900 text-slate-300 flex flex-col h-screen">
+    <header
+      class="flex items-center justify-between px-4 py-2 border-b border-slate-700 bg-slate-800"
+    >
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-code text-cyan-400 text-xl"></i>
+        <h1 class="text-lg font-bold text-slate-100">JSON開発ツール</h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <button
+          class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-md text-sm transition-colors flex items-center gap-2"
+        >
+          <i class="fa-solid fa-align-left text-xs"></i>整形
+        </button>
+        <button
+          class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-md text-sm transition-colors flex items-center gap-2"
+        >
+          <i class="fa-solid fa-compress text-xs"></i>圧縮
+        </button>
+        <button
+          class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-md text-sm transition-colors flex items-center gap-2"
+        >
+          <i class="fa-solid fa-copy text-xs"></i>コピー
+        </button>
+        <button
+          class="px-3 py-1 bg-red-800 hover:bg-red-700 rounded-md text-sm transition-colors flex items-center gap-2"
+        >
+          <i class="fa-solid fa-trash text-xs"></i>クリア
+        </button>
+      </div>
+      <div class="flex items-center gap-3">
+        <i
+          class="fa-solid fa-cloud-arrow-up text-lg text-slate-400 hover:text-white cursor-pointer"
+          title="ファイルアップロード"
+        ></i>
+        <i
+          class="fa-solid fa-link text-lg text-slate-400 hover:text-white cursor-pointer"
+          title="URLから取得"
+        ></i>
+      </div>
+    </header>
+
+    <main
+      class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-700 overflow-hidden"
+    >
+      <div class="bg-slate-800 flex flex-col overflow-hidden">
+        <div class="p-2 border-b border-slate-700 text-sm font-semibold">
+          コードビュー
+        </div>
+        <div class="flex-grow relative">
+          <textarea
+            class="font-mono text-sm w-full h-full p-4 bg-transparent text-slate-300 resize-none absolute top-0 left-0 focus:outline-none"
+            placeholder="ここにJSONを貼り付け、またはファイルをドラッグ＆ドロップしてください"
+          >
+{
+    "id": "001",
+    "type": "donut",
+    "name": "Cake",
+    "ppu": 0.55,
+    "available": true,
+    "batters": {
+        "batter": [
+            { "id": "1001", "type": "Regular" },
+            { "id": "1002", "type": "Chocolate" },
+            { "id": "1003", "type": "Blueberry" },
+            { "id": "1004", "type": "Devil's Food" }
+        ]
+    },
+    "topping": [
+        { "id": "5001", "type": "None" },
+        { "id": "5002", "type": "Glazed" },
+        { "id": "5005", "type": "Sugar" },
+        { "id": "5007", "type": "Powdered Sugar" },
+        { "id": "5006", "type": "Chocolate with Sprinkles" },
+        { "id": "5003", "type": "Chocolate" },
+        { "id": "5004", "type": "Maple" }
+    ],
+    "last_updated": "2025-06-08T12:57:00Z",
+    "image_url": "https://example.com/donut.png"
+}
+                </textarea
+          >
+        </div>
+      </div>
+
+      <div class="bg-slate-800 flex flex-col overflow-hidden">
+        <div
+          class="p-2 border-b border-slate-700 flex justify-between items-center"
+        >
+          <div class="text-sm font-semibold">ツリービュー</div>
+          <div class="relative">
+            <input
+              type="text"
+              placeholder="キーまたは値を検索..."
+              class="font-mono text-xs w-48 bg-slate-900 border border-slate-700 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            />
+            <i
+              class="fa-solid fa-magnifying-glass absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 text-xs"
+            ></i>
+          </div>
+        </div>
+        <div class="flex-grow p-4 overflow-y-auto font-mono text-sm">
+          <ul class="space-y-1">
+            <li>
+              <span class="text-cyan-400 cursor-pointer hover:underline"
+                ><i class="fa-solid fa-caret-down mr-1"></i>{ } root</span
+              >
+              <span class="text-slate-500 text-xs">Object[7]</span>
+            </li>
+            <li class="ml-6">
+              <span class="text-purple-400 w-20 inline-block">"id":</span>
+              <span class="text-orange-400">"001"</span>
+              <span class="text-slate-500 text-xs ml-2">string</span>
+            </li>
+            <li class="ml-6">
+              <span class="text-purple-400 w-20 inline-block">"type":</span>
+              <span class="text-orange-400">"donut"</span>
+              <span class="text-slate-500 text-xs ml-2">string</span>
+            </li>
+            <li class="ml-6">
+              <span class="text-purple-400 w-20 inline-block">"name":</span>
+              <span class="text-orange-400">"Cake"</span>
+              <span class="text-slate-500 text-xs ml-2">string</span>
+            </li>
+            <li class="ml-6">
+              <span class="text-purple-400 w-20 inline-block">"ppu":</span>
+              <span class="text-green-400">0.55</span>
+              <span class="text-slate-500 text-xs ml-2">number</span>
+            </li>
+            <li class="ml-6">
+              <span class="text-purple-400 w-20 inline-block"
+                >"available":</span
+              >
+              <span class="text-blue-400">true</span>
+              <span class="text-slate-500 text-xs ml-2">boolean</span>
+            </li>
+            <li class="ml-6">
+              <span class="text-cyan-400 cursor-pointer hover:underline"
+                ><i class="fa-solid fa-caret-down mr-1"></i>"batters":</span
+              >
+              <span class="text-slate-500 text-xs">Object[1]</span>
+            </li>
+            <li class="ml-12">
+              <span class="text-cyan-400 cursor-pointer hover:underline"
+                ><i class="fa-solid fa-caret-right mr-1"></i>"batter":</span
+              >
+              <span class="text-slate-500 text-xs">Array[4]</span>
+            </li>
+            <li
+              class="ml-6 bg-slate-700/50 rounded p-2 border-l-2 border-cyan-400"
+            >
+              <span class="text-cyan-400 cursor-pointer hover:underline"
+                ><i class="fa-solid fa-caret-down mr-1"></i>"topping":</span
+              >
+              <span class="text-slate-500 text-xs">Array[7]</span>
+              <ul class="space-y-1 mt-1">
+                <li class="ml-6">
+                  <span class="text-cyan-400 cursor-pointer hover:underline"
+                    ><i class="fa-solid fa-caret-right mr-1"></i>[0]:</span
+                  >
+                  <span class="text-slate-500 text-xs">Object[2]</span>
+                </li>
+                <li class="ml-6">
+                  <span class="text-cyan-400 cursor-pointer hover:underline"
+                    ><i class="fa-solid fa-caret-right mr-1"></i>[1]:</span
+                  >
+                  <span class="text-slate-500 text-xs">Object[2]</span>
+                </li>
+                <li class="ml-6 bg-cyan-900/50 rounded">
+                  <span class="text-cyan-400 cursor-pointer hover:underline"
+                    ><i class="fa-solid fa-caret-down mr-1"></i>[2]:</span
+                  >
+                  <span class="text-slate-500 text-xs">Object[2]</span>
+                  <ul class="space-y-1 mt-1">
+                    <li class="ml-6">
+                      <span class="text-purple-400 w-12 inline-block"
+                        >"id":</span
+                      >
+                      <span class="text-orange-400">"5005"</span>
+                    </li>
+                    <li class="ml-6">
+                      <span class="text-purple-400 w-12 inline-block"
+                        >"type":</span
+                      >
+                      <span class="text-orange-400">"Sugar"</span>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li class="ml-6">
+              <span class="text-purple-400 w-20 inline-block"
+                >"last_updated":</span
+              >
+              <span class="text-orange-400">"2025-06-08T12:57:00Z"</span>
+              <span class="text-slate-500 text-xs ml-2"
+                >string
+                <i class="fa-solid fa-clock ml-1" title="日付として認識"></i
+              ></span>
+            </li>
+            <li class="ml-6">
+              <span class="text-purple-400 w-20 inline-block"
+                >"image_url":</span
+              >
+              <a
+                href="#"
+                class="text-orange-400 underline hover:text-orange-300"
+                >"https://example.com/donut.png"</a
+              >
+              <span class="text-slate-500 text-xs ml-2"
+                >string
+                <i class="fa-solid fa-image ml-1" title="画像URLとして認識"></i
+              ></span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </main>
+
+    <footer
+      class="flex items-center justify-between px-4 py-1 border-t border-slate-700 bg-slate-800 text-xs font-mono"
+    >
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-check-circle text-green-500"></i>
+        <span>有効なJSONです</span>
+      </div>
+      <div class="text-slate-400">
+        <span>パス: root.topping[2]</span>
+      </div>
+    </footer>
+  </body>
+</html>
