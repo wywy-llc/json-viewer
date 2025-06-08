@@ -9,6 +9,10 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css"
+    />
     <style>
       body {
         font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'メイリオ',
@@ -60,9 +64,27 @@
       .tree-view li {
         position: relative;
       }
-      /* Added for tree view toggle */
       .tree-view ul.hidden {
         display: none;
+      }
+
+      /* --- Syntax Highlighting Styles --- */
+      #code-input {
+        /* Make textarea text invisible, but keep caret visible */
+        color: transparent;
+        caret-color: #e2e8f0; /* text-slate-200 */
+        background-color: transparent;
+      }
+      #highlighting {
+        /* Overlay for highlighted code */
+        pointer-events: none;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+      /* Override Prism's default background and margin */
+      pre[class*='language-'].code-highlight {
+        background: transparent;
+        margin: 0;
       }
     </style>
   </head>
@@ -254,9 +276,12 @@
           <div id="line-numbers" class="line-numbers-wrapper"></div>
           <textarea
             id="code-input"
-            class="font-mono text-sm w-full h-full p-4 bg-transparent text-slate-300 resize-none absolute top-0 left-0 focus:outline-none"
+            class="font-mono text-sm w-full h-full p-4 bg-transparent resize-none absolute top-0 left-0 focus:outline-none"
             style="padding-left: 4rem"
             placeholder="Paste your JSON here"
+            spellcheck="false"
+            autocorrect="off"
+            autocapitalize="off"
           >
 {
     "id": "001",
@@ -285,6 +310,12 @@
     "image_url": "https://example.com/donut.png"
 }</textarea
           >
+          <pre
+            id="highlighting"
+            aria-hidden="true"
+            class="font-mono text-sm w-full h-full p-4 absolute top-0 left-0 code-highlight"
+            style="padding-left: 4rem"
+          ><code id="highlighting-content" class="language-json"></code></pre>
         </div>
       </div>
 
@@ -323,11 +354,18 @@
       </div>
     </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         // --- DOM Element References ---
         const codeInput = document.getElementById('code-input');
         const lineNumbers = document.getElementById('line-numbers');
+        const highlighting = document.getElementById('highlighting');
+        const highlightingContent = document.getElementById(
+          'highlighting-content'
+        );
         const dropdownToggles = document.querySelectorAll(
           '[data-dropdown-toggle]'
         );
@@ -355,17 +393,11 @@
 
         // --- View Components (Render Functions) ---
 
-        /**
-         * Renders the entire application based on the current state.
-         */
         const render = () => {
           renderTreeView();
           renderFooter();
         };
 
-        /**
-         * Renders the footer section.
-         */
         const renderFooter = () => {
           jsonPathEl.textContent = `Path: ${appState.activePath}`;
           jsonNodesEl.textContent = `Nodes: ${appState.nodeCount}`;
@@ -382,9 +414,6 @@
           }
         };
 
-        /**
-         * Renders the main tree view section.
-         */
         const renderTreeView = () => {
           treeViewContainer.innerHTML = '';
           if (appState.error) {
@@ -409,11 +438,6 @@
           }
         };
 
-        /**
-         * Creates a DOM element for a single node in the JSON tree.
-         * @param {object} props - Properties for the node.
-         * @returns {HTMLLIElement}
-         */
         const createTreeNode = props => {
           const { key, value, path, parentType } = props;
           const li = document.createElement('li');
@@ -515,10 +539,16 @@
           return valueSpan;
         };
 
+        const updateHighlighting = text => {
+          highlightingContent.textContent = text;
+          Prism.highlightElement(highlightingContent);
+        };
+
         // --- Event Handlers ---
 
         const handleCodeInput = e => {
           const jsonString = e.target.value;
+          updateHighlighting(jsonString);
           let newState = { jsonString, sizeInBytes: jsonString.length };
           try {
             const data = jsonString.trim() ? JSON.parse(jsonString) : null;
@@ -547,10 +577,9 @@
               'rounded-md'
             );
           element.classList.add('bg-slate-800/50', 'rounded-md');
-          // Update state without causing a full re-render for this minor UI change
           appState.activeNodeEl = element;
           appState.activePath = path;
-          renderFooter(); // Only re-render the footer for performance
+          renderFooter();
         };
 
         // --- Utility Functions ---
@@ -586,6 +615,8 @@
           codeInput.addEventListener('input', updateLineNumbers);
           codeInput.addEventListener('scroll', () => {
             lineNumbers.scrollTop = codeInput.scrollTop;
+            highlighting.scrollTop = codeInput.scrollTop;
+            highlighting.scrollLeft = codeInput.scrollLeft;
           });
           updateLineNumbers();
 
@@ -611,7 +642,6 @@
         const initialize = () => {
           codeInput.addEventListener('input', handleCodeInput);
           initLegacyScripts();
-          // Trigger initial state processing
           handleCodeInput({ target: codeInput });
         };
 
